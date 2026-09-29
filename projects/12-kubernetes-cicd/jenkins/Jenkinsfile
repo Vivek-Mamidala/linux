@@ -1,0 +1,69 @@
+pipeline {
+    agent any
+
+    environment {
+	KUBECONFIG = '/var/lib/jenkins/.kube/config'
+    }
+
+    stages {
+	stage('Clean Workspace') {
+	    steps {
+		deleteDir()
+	    }
+	}
+	
+	stage('Checkout') {
+	    steps {
+		checkout scm
+	    }
+	}
+
+	stage('Build Image') {
+	    steps {
+		sh '''
+		    cd projects/12-kubernetes-cicd/app
+		    docker build -t k8s-cicd-app:v1 .
+		'''
+
+	    }
+	}
+
+	stage('Deploy to Kubernetes') {
+	    steps {
+		sh '''
+		    cd projects/12-kubernetes-cicd/k8s
+		    kubectl apply -f deployment.yaml
+		    kubectl apply -f service.yaml
+		'''
+	    }
+	}
+	
+	stage('Restart Deployment') {
+	    steps {
+		sh '''
+		    kubectl rollout restart deployment/k8s-cicd-app-deployment
+		    kubectl rollout status deployment/k8s-cicd-app-deployment
+
+		'''
+	    }
+	}
+	
+	stage('Verify Deployment') {
+	    steps {
+		sh '''
+		    kubectl get pods
+		    kubectl get svc
+		'''
+	    }
+	}
+    }
+
+    post {
+	success {
+	    echo 'Kubernetes CI/CD pipeline completed successfully.'
+	}
+	failure {
+	    echo 'Pipeline failed. Check logs for debugging.'
+	}
+    }
+}
