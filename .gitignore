@@ -1,0 +1,28 @@
+*.pem
+*.key
+*.crt
+.env
+
+# Terraform generated files
+**/.terraform/
+**/.terraform/*
+*.tfstate
+*.tfstate.*
+# Terraform working directories
+**/.terraform/
+
+# Terraform state
+*.tfstate
+*.tfstate.*
+
+# Terraform variable files
+*.tfvars
+*.tfvars.json
+!**/terraform.tfvars.example
+
+# Terraform provider lock files should be committed
+!**/.terraform.lock.hcl
+
+# Crash logs
+crash.log
+crash.*.log
